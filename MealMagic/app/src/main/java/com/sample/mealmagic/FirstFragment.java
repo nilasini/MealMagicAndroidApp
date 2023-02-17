@@ -57,11 +57,11 @@ public class FirstFragment extends Fragment {
             AuthorizationServiceConfiguration serviceConfiguration =
                     new AuthorizationServiceConfiguration(
                             /* authorize endpoint and token endpoint*/
-                            Uri.parse("https://dev.api.asgardeo.io/t/nila1/oauth2/authorize") ,
-                            Uri.parse("https://dev.api.asgardeo.io/t/nila1/oauth2/token")
+                            Uri.parse("https://api.asgardeo.io/t/orgu8mw8/oauth2/authorize") ,
+                            Uri.parse("https://api.asgardeo.io/t/orgu8mw8/oauth2/token")
                     );
-            String clientId = "WsbEf891AyTyI68q0XX5mzRd2Eka";
-            Uri redirectUri = Uri.parse("com.example.myapplication://oauth");
+            String clientId = "HU1mgcc225nms3NRZy2k93B8vVwa";
+            Uri redirectUri = Uri.parse("com.sample.mealmagic://home");
             AuthorizationRequest.Builder builder = new AuthorizationRequest.Builder(
                     serviceConfiguration,
                     clientId,

@@ -78,7 +78,7 @@ public class UserInfoActivity extends AppCompatActivity {
         executor.submit(() -> {
             try {
                 URL userInfoEndpoint = new URL(
-                        "https://dev.api.asgardeo.io/t/nila1/oauth2/userinfo");
+                        "https://api.asgardeo.io/t/orgu8mw8/oauth2/userinfo");
                 HttpURLConnection conn = (HttpURLConnection) userInfoEndpoint.openConnection();
                 conn.setRequestProperty("Authorization", "Bearer " + accessToken);
                 conn.setInstanceFollowRedirects(false);
@@ -104,7 +104,7 @@ public class UserInfoActivity extends AppCompatActivity {
     public class LogoutListener implements Button.OnClickListener {
         @Override
         public void onClick(View view) {
-            String logout_uri = "https://dev.api.asgardeo.io/t/nila1/oidc/logout";
+            String logout_uri = "https://api.asgardeo.io/t/orgu8mw8/oidc/logout";
             String url = logout_uri + "?id_token_hint=" + idToken;
 
             CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
