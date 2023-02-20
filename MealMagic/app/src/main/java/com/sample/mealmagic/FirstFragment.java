@@ -4,6 +4,7 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+
 import androidx.browser.customtabs.CustomTabsIntent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,7 +25,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class FirstFragment extends Fragment {
 
-    private FragmentFirstBinding binding;
+    private FragmentFirstBinding binding;:q
     private final AtomicReference<CustomTabsIntent> customTabIntent = new AtomicReference<>();
 
     @Override
@@ -54,37 +55,37 @@ public class FirstFragment extends Fragment {
         @Override
         public void onClick(View view) {
 
-            AuthorizationServiceConfiguration serviceConfiguration =
-                    new AuthorizationServiceConfiguration(
-                            /* authorize endpoint and token endpoint*/
-                            Uri.parse("https://api.asgardeo.io/t/orgu8mw8/oauth2/authorize") ,
-                            Uri.parse("https://api.asgardeo.io/t/orgu8mw8/oauth2/token")
-                    );
-            String clientId = "HU1mgcc225nms3NRZy2k93B8vVwa";
-            Uri redirectUri = Uri.parse("com.sample.mealmagic://home");
-            AuthorizationRequest.Builder builder = new AuthorizationRequest.Builder(
-                    serviceConfiguration,
-                    clientId,
-                    ResponseTypeValues.CODE,
-                    redirectUri
-            );
-            builder.setScopes("openid","profile");
-            AuthorizationRequest request = builder.build();
-            AuthorizationService authorizationService = new AuthorizationService(view.getContext());
-            CustomTabsIntent.Builder intentBuilder = authorizationService.
-                    createCustomTabsIntentBuilder(request.toUri());
+            AuthorizationServiceConfiguration.fetchFromIssuer(Uri.
+                            parse("https://api.asgardeo.io/t/orgu8mw8/oauth2/token"),
+                    (serviceConfiguration, ex) -> {
+                        String clientId = "HU1mgcc225nms3NRZy2k93B8vVwa";
+                        Uri redirectUri = Uri.parse("com.sample.mealmagic://home");
+                        AuthorizationRequest.Builder builder = new AuthorizationRequest.Builder(
+                                serviceConfiguration,
+                                clientId,
+                                ResponseTypeValues.CODE,
+                                redirectUri
+                        );
+                        builder.setScopes("openid", "profile");
+                        AuthorizationRequest request = builder.build();
+                        AuthorizationService authorizationService = new AuthorizationService(
+                                view.getContext());
+                        CustomTabsIntent.Builder intentBuilder = authorizationService.
+                                createCustomTabsIntentBuilder(request.toUri());
 
-            customTabIntent.set(intentBuilder.build());
+                        customTabIntent.set(intentBuilder.build());
 
-            Intent completionIntent = new Intent(view.getContext(), UserInfoActivity.class);
-            Intent cancelIntent = new Intent(view.getContext(), MainActivity.class);
+                        Intent completionIntent = new Intent(view.getContext(),
+                                UserInfoActivity.class);
+                        Intent cancelIntent = new Intent(view.getContext(), MainActivity.class);
 
-            authorizationService.performAuthorizationRequest(request, PendingIntent.
-                            getActivity(view.getContext(), 0,
-                                    completionIntent, 0), PendingIntent.getActivity(view.getContext(),
-                            0, cancelIntent, 0),
-                    customTabIntent.get());
+                        authorizationService.performAuthorizationRequest(request, PendingIntent.
+                                        getActivity(view.getContext(), 0,
+                                                completionIntent, 0), PendingIntent.
+                                        getActivity(view.getContext(), 0, cancelIntent,
+                                                0),
+                                customTabIntent.get());
+                    });
         }
     }
-
 }
