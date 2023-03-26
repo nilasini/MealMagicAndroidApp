@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.browser.customtabs.CustomTabsIntent;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,7 +26,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class FirstFragment extends Fragment {
 
-    private FragmentFirstBinding binding;:q
+    private FragmentFirstBinding binding;
     private final AtomicReference<CustomTabsIntent> customTabIntent = new AtomicReference<>();
 
     @Override
@@ -55,36 +56,42 @@ public class FirstFragment extends Fragment {
         @Override
         public void onClick(View view) {
 
-            AuthorizationServiceConfiguration.fetchFromIssuer(Uri.
-                            parse("https://api.asgardeo.io/t/orgu8mw8/oauth2/token"),
+            String tokenEndpoint = ConfigManager.
+                    readConfigValues(view.getContext(), "token_endpoint");
+            String clientId = ConfigManager.readConfigValues(view.getContext(), "client_id");
+            String redirectUrl = ConfigManager.
+                    readConfigValues(view.getContext(), "redirect_url");
+            String scopes = ConfigManager.readConfigValues(view.getContext(), "scopes");
+            AuthorizationServiceConfiguration.fetchFromIssuer(Uri.parse(tokenEndpoint),
                     (serviceConfiguration, ex) -> {
-                        String clientId = "HU1mgcc225nms3NRZy2k93B8vVwa";
-                        Uri redirectUri = Uri.parse("com.sample.mealmagic://home");
-                        AuthorizationRequest.Builder builder = new AuthorizationRequest.Builder(
-                                serviceConfiguration,
-                                clientId,
-                                ResponseTypeValues.CODE,
-                                redirectUri
-                        );
-                        builder.setScopes("openid", "profile");
-                        AuthorizationRequest request = builder.build();
-                        AuthorizationService authorizationService = new AuthorizationService(
-                                view.getContext());
-                        CustomTabsIntent.Builder intentBuilder = authorizationService.
-                                createCustomTabsIntentBuilder(request.toUri());
+                        Uri redirectUri = Uri.parse(redirectUrl);
+                        if (serviceConfiguration != null && clientId != null) {
+                            AuthorizationRequest.Builder builder = new AuthorizationRequest.Builder(
+                                    serviceConfiguration,
+                                    clientId,
+                                    ResponseTypeValues.CODE,
+                                    redirectUri
+                            );
+                            if (scopes != null) {
+                                builder.setScopes(scopes.split(","));
+                            }
+                            AuthorizationRequest request = builder.build();
+                            AuthorizationService authorizationService = new AuthorizationService(
+                                    view.getContext());
 
-                        customTabIntent.set(intentBuilder.build());
+                            CustomTabsIntent.Builder intentBuilder = authorizationService.
+                                    createCustomTabsIntentBuilder(request.toUri());
+                            customTabIntent.set(intentBuilder.build());
+                            Intent completionIntent = new Intent(view.getContext(),
+                                    UserInfoActivity.class);
+                            Intent cancelIntent = new Intent(view.getContext(), MainActivity.class);
 
-                        Intent completionIntent = new Intent(view.getContext(),
-                                UserInfoActivity.class);
-                        Intent cancelIntent = new Intent(view.getContext(), MainActivity.class);
-
-                        authorizationService.performAuthorizationRequest(request, PendingIntent.
-                                        getActivity(view.getContext(), 0,
-                                                completionIntent, 0), PendingIntent.
-                                        getActivity(view.getContext(), 0, cancelIntent,
-                                                0),
-                                customTabIntent.get());
+                            authorizationService.performAuthorizationRequest(request, PendingIntent.
+                                            getActivity(view.getContext(), 0,
+                                                    completionIntent, 0), PendingIntent.
+                                            getActivity(view.getContext(), 0,
+                                                    cancelIntent, 0), customTabIntent.get());
+                        }
                     });
         }
     }

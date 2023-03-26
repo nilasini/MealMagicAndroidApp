@@ -3,6 +3,7 @@ package com.sample.mealmagic;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -20,6 +21,7 @@ import org.json.JSONObject;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -30,6 +32,7 @@ public class UserInfoActivity extends AppCompatActivity {
 
     String idToken;
     String accessToken;
+    private static final String TAG = "UserInfoActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +51,6 @@ public class UserInfoActivity extends AppCompatActivity {
     private void handleAuthorizationResponse(Intent intent) {
 
         final AuthorizationResponse response = AuthorizationResponse.fromIntent(intent);
-
         AuthorizationService service = new AuthorizationService(this);
         if (response != null) {
             performTokenRequest(service, response.createTokenExchangeRequest(),
@@ -74,29 +76,30 @@ public class UserInfoActivity extends AppCompatActivity {
 
 
     private void callUserInfo(){
+
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {
             try {
-                URL userInfoEndpoint = new URL(
-                        "https://api.asgardeo.io/t/orgu8mw8/oauth2/userinfo");
+                String userinfoEndpoint = ConfigManager.
+                        readConfigValues(getApplicationContext(), "userinfo_endpoint");
+                URL userInfoEndpoint = new URL(userinfoEndpoint);
                 HttpURLConnection conn = (HttpURLConnection) userInfoEndpoint.openConnection();
                 conn.setRequestProperty("Authorization", "Bearer " + accessToken);
                 conn.setInstanceFollowRedirects(false);
                 String response = Okio.buffer(Okio.source(conn.getInputStream())).
-                        readString(StandardCharsets.UTF_8);
+                        readString((StandardCharsets.UTF_8));
                 JSONObject json = new JSONObject(response);
 
-                TextView username = findViewById(R.id.username);
+                TextView username1 = findViewById(R.id.username1);
                 TextView username2 = findViewById(R.id.username2);
 
-                username.setText(json.getString("username"));
+                username1.setText(json.getString("username"));
                 username2.setText(json.getString("username"));
 
                 Button btnClick = findViewById(R.id.logout);
                 btnClick.setOnClickListener(new LogoutListener());
-
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e(TAG, "Error while parsing json object.");
             }
         });
     }
@@ -104,8 +107,10 @@ public class UserInfoActivity extends AppCompatActivity {
     public class LogoutListener implements Button.OnClickListener {
         @Override
         public void onClick(View view) {
-            String logout_uri = "https://api.asgardeo.io/t/orgu8mw8/oidc/logout";
-            String url = logout_uri + "?id_token_hint=" + idToken;
+
+            String logoutEndpoint = ConfigManager.
+                    readConfigValues(view.getContext(), "logout_endpoint");
+            String url = logoutEndpoint + "?id_token_hint=" + idToken;
 
             CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
             CustomTabsIntent customTabsIntent = builder.build();
